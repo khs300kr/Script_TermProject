@@ -1,29 +1,67 @@
-loopFlag = 11
-#from internetbook import *
+from CFR_API import *
+from tkinter import *
+import threading
 
-def PrintMenu():
-    print("========Menu==========")
-    print("사진 촬영(p/P)")
-    print("연예인 랭킹 검색(r/R)")
-    print("프로그램 종료(q/Q)")
-    print("----------------------------------------")
-def launcherFunction(menu):
-    if menu == 'p' or menu == 'P':
-        pass
-    elif menu == 'r' or menu == 'R':
-        pass
-    elif menu == 'q' or menu == 'Q':
-        QuitMenu()
+WINDOW_WIDTH = 900
+WINDOW_HEIGHT = 800
+scene = "MainMenu"
+photo = 0
+imageLabel = 0
+b1 = 0
 
-def QuitMenu():
-    global loopFlag
-    loopFlag = 0
-    print("quit")
+class App(threading.Thread):
+    def __init__(self):
+        threading.Thread.__init__(self)
+        self.start()
 
-##### run #####
-while(loopFlag > 0):
-    PrintMenu()
-    menuKey = str(input ('select menu :'))
-    launcherFunction(menuKey)
-else:
-    print ("Thank you! Good Bye")
+    def callback(self):
+        self.g_Tk.quit()
+
+    def change_scene(self,path):
+        global imageLabel
+        img = PhotoImage(file=path)
+        imageLabel.configure(image=img)
+        imageLabel.image = img
+
+    # def mouseEvent(event):
+    #     # global scene
+    #     # # mouse process
+    #     # if event.x < 300 and scene == "MainMenu":
+    #     #     scene = "waiting"
+    #     #     self.change_scene(scene + ".gif")
+    #     print(event.x, ",", event.y)
+    def process(self):
+        global scene, b1
+        b1.place(x=1000,y=1000)
+        scene = "waiting"
+        self.change_scene(scene + ".gif")
+
+    def run(self):
+        global scene, photo, imageLabel, b1
+
+        self.g_Tk = Tk()
+        self.g_Tk.wm_title("Project_CFR")
+        SetCenter = (self.g_Tk.winfo_screenwidth() // 2) - 450
+        self.g_Tk.geometry("{0}x{1}+{2}+0".format(WINDOW_WIDTH, WINDOW_HEIGHT, SetCenter))
+        self.g_Tk.protocol("WM_DELETE_WINDOW", self.callback)
+
+        # scene
+        photo = PhotoImage(file="MainMenu.gif")
+        imageLabel = Label(self.g_Tk, image=photo)
+        imageLabel.pack()
+
+        b1 = Button(self.g_Tk, text = "사진찍기",command = self.process)
+        b1.place(x=100,y=100)
+
+
+        self.g_Tk.mainloop()
+
+
+if __name__ == "__main__":
+    app = App()
+    CFR_Process()
+
+
+
+
+
