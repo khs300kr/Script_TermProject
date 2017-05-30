@@ -12,8 +12,6 @@ url = "https://openapi.naver.com/v1/vision/celebrity" # 유명인 얼굴인식
 data = 0
 done = False
 
-
-
 def CFR_Process():
     global id, clientId, clientSecret, url
     while(1):
@@ -25,11 +23,10 @@ def CFR_Process():
             else:
                 break
 
-    fileName = str(id) + ".jpg"
-
-    image = Image.init()
-
     while(1):
+        fileName = str(id) + ".jpg"
+        image = Image.init()
+
         while(1):
             try:
                 image = Image.open(fileName)
@@ -56,7 +53,4 @@ def CFR_Process():
             print("Error Code:", rescode)
 
         id += 1
-        done = True
-
-        break
 
