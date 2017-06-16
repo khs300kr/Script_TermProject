@@ -19,13 +19,17 @@ class App(threading.Thread):
         self.start()
 
     def callback(self):
+        global is_QUIT
+        is_QUIT = True
         self.g_Tk.quit()
 
     def mouse(self, event):
-        global scene
-        if event.x < 300:
-            scene = "waiting"
-            self.change_scene(scene+".gif");
+        # Quit
+        if event.x > 640 and event.x < 850 and event.y < 780 and event.y > 730:
+            self.callback()
+        # Rank
+        elif event.x > 45 and event.x < 280 and event.y < 780 and event.y > 730:
+            pass
 
     def change_scene(self, path):
         global ImageLabel
@@ -50,6 +54,20 @@ class App(threading.Thread):
         CelebrityLabel.pack()
         CelebrityLabel.place(x=120, y=80)
 
+    def Rendner_myface(self):
+        global id
+        path = str(id) + ".jpg"
+        print(path)
+
+        im = Image.open(path)
+        im = im.resize((235, 300), Image.ANTIALIAS)
+        img = ImageTk.PhotoImage(im)
+
+        ImageLabel = Label(self.g_Tk, image=img, height=300, width=235)
+        ImageLabel.configure(image = img)
+        ImageLabel.image = img
+        ImageLabel.pack()
+        ImageLabel.place(x=530,y=130)
 
     def run(self):
         global scene, photo, ImageLabel
@@ -70,16 +88,16 @@ class App(threading.Thread):
 
 
 def CFR_Process():
-    global id, clientId, clientSecret, url
+    global id, clientId, clientSecret, url, is_QUIT
     # File Search
     while(1):
-            fileName = str(id) + ".jpg"
-            file = Path(fileName)
-            if file.is_file():
-                id += 1
-                continue
-            else:
-                break
+        fileName = str(id) + ".jpg"
+        file = Path(fileName)
+        if file.is_file():
+            id += 1
+            continue
+        else:
+            break
 
     # After Search
     while(1):
@@ -87,6 +105,8 @@ def CFR_Process():
         image = Image.init()
 
         while(1):
+            if is_QUIT == True:
+                return False
             try:
                 image = Image.open(fileName)
                 break
@@ -129,15 +149,17 @@ def CFR_Process():
 
 def RenderResult(searchUrl):
     global app, scene
-
     scene = "ShowResult"
-    app.change_scene("ShowResult.gif")
-    app.Render_celebrity(searchUrl)
+    if scene == "ShowResult":
+        app.change_scene("ShowResult.gif")
+        app.Render_celebrity(searchUrl)
+        app.Rendner_myface()
 
 def main():
     global app
     app = App()
     CFR_Process()
+
 
 if __name__ == '__main__':
     main()

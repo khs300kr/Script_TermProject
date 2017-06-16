@@ -7,7 +7,7 @@ ImageLabel = 0
 CelebrityLabel = 0
 app = 0
 
-pictureTaken = False
+is_QUIT = False
 
 ########################## CFR VARIABLES ##########################
 LOOP_ACTIVE = True
