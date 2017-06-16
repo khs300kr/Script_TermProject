@@ -2,7 +2,6 @@ from CFR_API import *
 from GlobalVriables import *
 from tkinter import *
 import threading
-import time
 
 class App(threading.Thread):
     def __init__(self):
@@ -40,22 +39,20 @@ class App(threading.Thread):
         imageLabel.pack()
 
         self.g_Tk.mainloop()
-        # if pictureTaken == True:
-        #     print("ge true");
+
 
 def canchagneSceneHere():
     global app, scene
-    time.sleep(3)
     scene = "ShowResult"
     app.change_scene("ShowResult.gif")
 
 def main():
-    global app
-    app = App();
-    CFR_Process();
-    print("main");
+        global app
+        app = App()
+        CFR_Process()
 
+def pp():
+    print("SIBAL")
 
-
-
-main()
+if __name__ == '__main__':
+    main()
