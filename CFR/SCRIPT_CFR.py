@@ -57,7 +57,6 @@ class App(threading.Thread):
     def Rendner_myface(self):
         global id
         path = str(id) + ".jpg"
-        print(path)
 
         im = Image.open(path)
         im = im.resize((235, 300), Image.ANTIALIAS)
@@ -68,6 +67,40 @@ class App(threading.Thread):
         ImageLabel.image = img
         ImageLabel.pack()
         ImageLabel.place(x=530,y=130)
+
+    def Redner_rankfaces(self):
+        global id
+        path = str(id) + ".jpg"
+
+        im1 = Image.open(path)
+        im1 = im1.resize((160, 200), Image.ANTIALIAS)
+        img1 = ImageTk.PhotoImage(im1)
+
+        ImageLabel1 = Label(self.g_Tk, image=img1, height=200, width=160)
+        ImageLabel1.configure(image=img1)
+        ImageLabel1.image = img1
+        ImageLabel1.pack()
+        ImageLabel1.place(x=40, y=520)
+
+        im2 = Image.open(path)
+        im2 = im2.resize((160, 200), Image.ANTIALIAS)
+        img2 = ImageTk.PhotoImage(im2)
+
+        ImageLabel2 = Label(self.g_Tk, image=img2, height=200, width=160)
+        ImageLabel2.configure(image=img2)
+        ImageLabel2.image = img2
+        ImageLabel2.pack()
+        ImageLabel2.place(x=210, y=520)
+
+        im3 = Image.open(path)
+        im3 = im3.resize((160, 200), Image.ANTIALIAS)
+        img3 = ImageTk.PhotoImage(im3)
+
+        ImageLabel3 = Label(self.g_Tk, image=img3, height=200, width=160)
+        ImageLabel3.configure(image=img3)
+        ImageLabel3.image = img3
+        ImageLabel3.pack()
+        ImageLabel3.place(x=380, y=520)
 
     def run(self):
         global scene, photo, ImageLabel
@@ -154,6 +187,7 @@ def RenderResult(searchUrl):
         app.change_scene("ShowResult.gif")
         app.Render_celebrity(searchUrl)
         app.Rendner_myface()
+        app.Redner_rankfaces()
 
 def main():
     global app
