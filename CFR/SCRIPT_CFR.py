@@ -12,7 +12,7 @@ import json
 from io import BytesIO
 import urllib
 from PIL import Image,ImageTk
-
+import DoubleH
 
 class App(threading.Thread):
     def __init__(self):
@@ -179,14 +179,7 @@ def CFR_Process():
     global id, clientId, clientSecret, url, is_QUIT, my_celeb, my_confidence
 
     # File Search
-    while(1):
-        fileName = str(id) + ".jpg"
-        file = Path(fileName)
-        if file.is_file():
-            id += 1
-            continue
-        else:
-            break
+    id = DoubleH.CountCurrentFile("C:\Script_TermProject\CFR")
 
     # After Search
     while(1):
