@@ -122,6 +122,7 @@ class App(threading.Thread):
 
 def CFR_Process():
     global id, clientId, clientSecret, url, is_QUIT
+
     # File Search
     while(1):
         fileName = str(id) + ".jpg"
@@ -158,7 +159,11 @@ def CFR_Process():
             global data, searchData, done
             data = response.json()
             if(data['info']['faceCount'] == 1):
-                print("%d번째 얼굴은 %s을(를) %.1lf%c 닮았습니다." % (id, data['faces'][0]['celebrity']['value'], data['faces'][0]['celebrity']['confidence'] * 100.0, '%'))
+                name = data['faces'][0]['celebrity']['value']
+                confidence = data['faces'][0]['celebrity']['confidence'] * 100.0
+
+                print("%d번째 얼굴은 %s을(를) %.1lf%c 닮았습니다." % (id, name, confidence, '%'))
+
                 encText = urllib.parse.quote(data['faces'][0]['celebrity']['value'])
                 searchUrl = "https://openapi.naver.com/v1/search/image?query=" + encText  # json 결과
                 request = urllib.request.Request(searchUrl)
@@ -170,7 +175,49 @@ def CFR_Process():
                     responseBody = searchResponse.read()
                     searchData =  json.loads(responseBody.decode('utf-8'))
                     print(searchData['items'][0]['link'])
-                    RenderResult(searchData['items'][0]['link'])
+
+                    with open('./FaceJSONData.json', 'r') as f:
+                        tempDict = json.load(f)
+
+                    if (name in tempDict):
+                        if (tempDict[name]['first']['confidence'] < confidence):
+                            if ('third' in tempDict[name]):
+                                tempDict[name]['third'] = tempDict[name]['second']
+                                tempDict[name]['second'] = tempDict[name]['first']
+                                tempDict[name]['first'] = {'confidence': confidence, 'file': fileName}
+                            else:
+                                if ('second' in tempDict[name]):
+                                    tempDict[name].update({'third': tempDict[name]['second']})
+                                    tempDict[name]['second'] = tempDict[name]['first']
+                                    tempDict[name]['first'] = {'confidence': confidence, 'file': fileName}
+                                else:
+                                    tempDict[name].update({'second': tempDict[name]['first']})
+                                    tempDict[name]['first'] = {'confidence': confidence, 'file': fileName}
+                        else:
+                            if ('second' in tempDict[name]):
+                                if (tempDict[name]['second']['confidence'] < confidence):
+                                    if ('third' in tempDict[name]):
+                                        tempDict[name]['third'] = tempDict[name]['second']
+                                        tempDict[name]['second'] = {'confidence': confidence, 'file': fileName}
+                                    else:
+                                        tempDict[name].update({'third': tempDict[name]['second']})
+                                        tempDict[name]['second'] = {'confidence': confidence, 'file': fileName}
+                                else:
+                                    if ('third' in tempDict[name]):
+                                        if (tempDict[name]['third']['confidence'] < confidence):
+                                            tempDict[name]['third'] = {'confidence': confidence, 'file': fileName}
+                                    else:
+                                        if (tempDict[name]['third']['confidence'] < confidence):
+                                            tempDict[name].update({'third': {'confidence': confidence, 'file': fileName}})
+                            else:
+                                tempDict[name].update({'second': {'confidence': confidence, 'file': fileName}})
+                    else:
+                        tempDict[name] = {'first': {'confidence': confidence, 'file': fileName}}
+
+                    print(json.dumps(tempDict, ensure_ascii=False))
+
+                    with open('./FaceJSONData.json', 'w') as f:
+                        json.dump(tempDict, f, ensure_ascii=False)
                 else:
                     print("Error Code:" + searchRescode)
             else:
