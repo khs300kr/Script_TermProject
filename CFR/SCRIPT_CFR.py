@@ -1,5 +1,6 @@
 from GlobalVriables import *
 from tkinter import *
+from tkinter import font
 import threading
 ############################### CFR_API ###############################
 import requests
@@ -23,22 +24,43 @@ class App(threading.Thread):
         is_QUIT = True
         self.g_Tk.quit()
 
+    # Mouse Event
     def mouse(self, event):
         # Quit
         if event.x > 640 and event.x < 850 and event.y < 780 and event.y > 730:
             self.callback()
         # Rank
         elif event.x > 45 and event.x < 280 and event.y < 780 and event.y > 730:
-            pass
+            RenderRank()
 
+    # Rank UI
+    def Input_Label(self):
+        TempFont = font.Font(self.g_Tk,size = 15,weight ='bold', family = 'Consolas')
+        InputLabel = Entry(self.g_Tk, font = TempFont, width = 35, borderwidth =12,
+                           relief = 'ridge')
+        InputLabel.pack()
+        InputLabel.place(x=220, y=220)
+
+    def search_button(self):
+        TempFont = font.Font(self.g_Tk,size = 15,weight ='bold', family = 'Consolas')
+        SearchButton = Button(self.g_Tk, font=TempFont, text="검색",
+                              command=self.SearchButtonAction)
+        SearchButton.pack()
+        SearchButton.place(x=650, y=225)
+
+    def SearchButtonAction(self):
+        pass
+
+    # To change scene
     def change_scene(self, path):
         global ImageLabel
         img = PhotoImage(file=path)
         ImageLabel.configure(image=img)
         ImageLabel.image = img
 
+    # Result
     def Render_celebrity(self,url):
-        global CelebrityLabel
+        global CelebrityLabel, my_celeb, my_confidence
 
         with urllib.request.urlopen(url) as u:
             raw_data = u.read()
@@ -54,7 +76,14 @@ class App(threading.Thread):
         CelebrityLabel.pack()
         CelebrityLabel.place(x=120, y=80)
 
-    def Rendner_myface(self):
+        CelebLabel = Label(self.g_Tk, text = my_celeb,bg = "black", fg = "white", font = "Consolas")
+        CelebLabel.place(x = 225, y = 485)
+
+        ConfiLabel = Label(self.g_Tk, text = str(my_confidence) + "%",bg = "black", fg = "white", font = "Consolas")
+        ConfiLabel.place(x = 295 , y = 485)
+
+
+    def Render_myface(self):
         global id
         path = str(id) + ".jpg"
 
@@ -68,11 +97,22 @@ class App(threading.Thread):
         ImageLabel.pack()
         ImageLabel.place(x=530,y=130)
 
-    def Redner_rankfaces(self):
-        global id
-        path = str(id) + ".jpg"
 
-        im1 = Image.open(path)
+    def Render_rankfaces(self):
+        global ResultRank1, ResultRank2, ResultRank3
+        global im1,im2,im3
+        global ResultConf1, ResultConf2, ResultConf3
+
+        print("render")
+        print(ResultRank1,ResultRank2,ResultRank3)
+
+        if ResultRank1 != 0:
+            im1 = Image.open(ResultRank1)
+            RankLabel1 = Label(self.g_Tk, text=str(ResultConf1) + "%", bg="black", fg="white", font="Consolas")
+            RankLabel1.place(x=150, y=740)
+        else:
+            im1 = Image.open("NoImage.gif")
+
         im1 = im1.resize((160, 200), Image.ANTIALIAS)
         img1 = ImageTk.PhotoImage(im1)
 
@@ -81,8 +121,15 @@ class App(threading.Thread):
         ImageLabel1.image = img1
         ImageLabel1.pack()
         ImageLabel1.place(x=40, y=520)
+        ResultRank1 = 0
 
-        im2 = Image.open(path)
+        if ResultRank2 != 0:
+            im2 = Image.open(ResultRank2)
+            RankLabel2 = Label(self.g_Tk, text=str(ResultConf2) + "%", bg="black", fg="white", font="Consolas")
+            RankLabel2.place(x=320, y=740)
+        else:
+            im2 = Image.open("NoImage.gif")
+
         im2 = im2.resize((160, 200), Image.ANTIALIAS)
         img2 = ImageTk.PhotoImage(im2)
 
@@ -91,8 +138,15 @@ class App(threading.Thread):
         ImageLabel2.image = img2
         ImageLabel2.pack()
         ImageLabel2.place(x=210, y=520)
+        ResultRank2 = 0
 
-        im3 = Image.open(path)
+        if ResultRank3 != 0:
+            im3 = Image.open(ResultRank3)
+            RankLabel3 = Label(self.g_Tk, text=str(ResultConf3) + "%", bg="black", fg="white", font="Consolas")
+            RankLabel3.place(x=490, y=740)
+        else:
+            im3 = Image.open("NoImage.gif")
+
         im3 = im3.resize((160, 200), Image.ANTIALIAS)
         img3 = ImageTk.PhotoImage(im3)
 
@@ -101,6 +155,7 @@ class App(threading.Thread):
         ImageLabel3.image = img3
         ImageLabel3.pack()
         ImageLabel3.place(x=380, y=520)
+        ResultRank3 = 0
 
     def run(self):
         global scene, photo, ImageLabel
@@ -121,7 +176,7 @@ class App(threading.Thread):
 
 
 def CFR_Process():
-    global id, clientId, clientSecret, url, is_QUIT
+    global id, clientId, clientSecret, url, is_QUIT, my_celeb, my_confidence
 
     # File Search
     while(1):
@@ -160,9 +215,11 @@ def CFR_Process():
             data = response.json()
             if(data['info']['faceCount'] == 1):
                 name = data['faces'][0]['celebrity']['value']
-                confidence = data['faces'][0]['celebrity']['confidence'] * 100.0
+                confidence = round(data['faces'][0]['celebrity']['confidence'] * 100.0 )
 
                 print("%d번째 얼굴은 %s을(를) %.1lf%c 닮았습니다." % (id, name, confidence, '%'))
+                my_celeb = name
+                my_confidence = confidence
 
                 encText = urllib.parse.quote(data['faces'][0]['celebrity']['value'])
                 searchUrl = "https://openapi.naver.com/v1/search/image?query=" + encText  # json 결과
@@ -207,8 +264,7 @@ def CFR_Process():
                                         if (tempDict[name]['third']['confidence'] < confidence):
                                             tempDict[name]['third'] = {'confidence': confidence, 'file': fileName}
                                     else:
-                                        if (tempDict[name]['third']['confidence'] < confidence):
-                                            tempDict[name].update({'third': {'confidence': confidence, 'file': fileName}})
+                                        tempDict[name].update({'third': {'confidence': confidence, 'file': fileName}})
                             else:
                                 tempDict[name].update({'second': {'confidence': confidence, 'file': fileName}})
                     else:
@@ -218,6 +274,41 @@ def CFR_Process():
 
                     with open('./FaceJSONData.json', 'w') as f:
                         json.dump(tempDict, f, ensure_ascii=False)
+
+                    ############################################################
+                    with open('./FaceJSONData.json', 'r') as f:
+                        dict = json.load(f)
+
+                    # 검색
+                    global ResultRank1, ResultRank2, ResultRank3
+                    global ResultConf1, ResultConf2, ResultConf3
+
+                    if name in dict:
+                        print(dict[name]['first']['confidence'])
+                        print(dict[name]['first']['file'])
+                        ResultRank1 = dict[name]['first']['file']
+                        ResultConf1 = round(dict[name]['first']['confidence'])
+                        if 'second' in dict[name]:
+                            print(dict[name]['second']['confidence'])
+                            print(dict[name]['second']['file'])
+                            ResultRank2 = dict[name]['second']['file']
+                            ResultConf2 = round(dict[name]['second']['confidence'])
+
+                            if 'third' in dict[name]:
+                                print(dict[name]['third']['confidence'])
+                                print(dict[name]['third']['file'])
+                                ResultRank3 = dict[name]['third']['file']
+                                ResultConf3 = round(dict[name]['third']['confidence'])
+
+                            else:
+                                print("third가 없습니다.")
+                        else:
+                            print("second가 없습니다.")
+                    else:
+                        print("검색 결과가 존재하지 않습니다.")
+                    RenderResult(searchData['items'][0]['link'])
+
+                        ############################################################
                 else:
                     print("Error Code:" + searchRescode)
             else:
@@ -233,8 +324,16 @@ def RenderResult(searchUrl):
     if scene == "ShowResult":
         app.change_scene("ShowResult.gif")
         app.Render_celebrity(searchUrl)
-        app.Rendner_myface()
-        app.Redner_rankfaces()
+        app.Render_myface()
+        app.Render_rankfaces()
+
+def RenderRank():
+    global app,scene
+    scene = "Rank"
+    if scene == "Rank":
+        app.change_scene(scene + ".gif")
+        app.Input_Label()
+        app.search_button()
 
 def main():
     global app

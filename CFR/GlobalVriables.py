@@ -8,7 +8,19 @@ CelebrityLabel = 0
 app = 0
 
 is_QUIT = False
+ResultRank1 = 0
+ResultRank2 = 0
+ResultRank3 = 0
+ResultConf1 = 0
+ResultConf2 = 0
+ResultConf3 = 0
 
+im1 = 0
+im2 = 0
+im3 = 0
+
+my_confidence = 0
+my_celeb = 0
 ########################## CFR VARIABLES ##########################
 LOOP_ACTIVE = True
 id = 0
